@@ -3,7 +3,7 @@
     <a-row :wrap="false" align="middle" class="header-row">
       <a-col flex="200px">
         <div class="logo-title">
-          <img src="@/assets/logo.svg" alt="logo" class="logo" />
+          <img src="@/assets/inari.ico" alt="logo" class="logo" />
           <div class="title">{{ $t('appName') }}</div> <!-- 替换为翻译 -->
         </div>
       </a-col>

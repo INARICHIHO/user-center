@@ -15,6 +15,17 @@ import zhCN from 'ant-design-vue/es/locale/zh_CN'
 import jaJP from 'ant-design-vue/es/locale/ja_JP'
 import BasicLayout from '@/layouts/BasicLayout.vue'
 import { useSettingsStore, type ThemeName } from '@/stores/settings'
+import { onMounted } from 'vue';
+import myAxios from 'axios';  // 或者你封装的 myAxios
+
+onMounted(async () => {
+  try {
+    const res = await myAxios.get('http://localhost:8080/hello');
+    console.log('后端响应：', res.data);
+  } catch (error) {
+    console.error('后端连接失败：', error);
+  }
+});
 
 const settingsStore = useSettingsStore()
 

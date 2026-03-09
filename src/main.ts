@@ -29,11 +29,11 @@ Object.keys(Icons).forEach(key => {
 })
 
 async function bootstrap() {
-  if (import.meta.env.DEV) {
+/*   if (import.meta.env.DEV) {
     await import('./mock');  // ✅ 现在在 async 函数内部，合法
     console.log('✅ Mock 加载完成');
   }
-
+ */
   app.use(router);
   app.use(Antd);
   app.use(pinia);

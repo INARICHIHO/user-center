@@ -38,22 +38,27 @@ export const useUserStore = defineStore('user', () => {
 async function login(params: LoginParams) {
   loading.value = true;
   try {
-    const res: any = await apiLogin(params);
+    const res = await apiLogin(params);
     console.log('登录响应完整结构：', res);
 
-    // 检查数据路径（根据你的拦截器，数据在 res.data 里）
+    // 判断 res.data.code 是否为 0
     if (res.data?.code === 0) {
-      const newToken = res.data.data.token;
-      token.value = newToken;               // ✅ 直接赋值
-      localStorage.setItem('token', newToken);
+      // 登录成功，后端返回的用户信息在 res.data.data.userInfo
+      userInfo.value = res.data.data.userInfo;
+      // 由于使用 Session，不需要真实 token，但为了代码逻辑统一，我们设置一个固定值 'session'
+      token.value = 'session';
+      localStorage.setItem('token', 'session');
       
-      await fetchCurrentUser();              // 获取用户信息
+      // 可选：立即获取最新用户信息（虽然上面已设置，但 fetchCurrentUser 会从后端拉取，保证一致性）
+      await fetchCurrentUser();
+      
       return { code: 0, message: '登录成功' };
     } else {
+      console.error('登录失败:', res.data?.message || '未知错误');
       return { code: -1, message: res.data?.message || '登录失败' };
     }
   } catch (error) {
-    console.error('登录异常:', error);
+    console.error('请求异常:', error);
     return { code: -2, message: '网络错误' };
   } finally {
     loading.value = false;
@@ -113,17 +118,24 @@ async function logout() {
 async function fetchCurrentUser() {
   if (!token.value) {
     console.log('无 token，跳过获取用户信息');
+    userInfo.value = null;
     return;
   }
   loading.value = true;
   try {
-    const res: any = await apiGetCurrentUser();
+    const res = await apiGetCurrentUser();
     console.log('获取用户信息响应：', res);
     if (res.data?.code === 0) {
-      userInfo.value = res.data.data;   // ✅ 正确路径
+      userInfo.value = res.data.data;
+    } else if (res.data?.code === 40100) {
+      // token 失效或未登录，清除本地 token
+      token.value = null;
+      userInfo.value = null;
+      localStorage.removeItem('token');
     } else {
       console.error('获取用户信息失败:', res.data?.message);
     }
+    return res;
   } catch (error) {
     console.error('获取用户信息异常:', error);
   } finally {
@@ -138,7 +150,7 @@ async function fetchCurrentUser() {
 async function init() {
   const savedToken = localStorage.getItem('token');
   if (savedToken) {
-    token.value = savedToken;      // 注意用 .value
+    token.value = savedToken; // 'session' 或其他
     await fetchCurrentUser();
   } else {
     userInfo.value = null;
