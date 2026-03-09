@@ -20,7 +20,7 @@ import myAxios from 'axios';  // 或者你封装的 myAxios
 
 onMounted(async () => {
   try {
-    const res = await myAxios.get('http://localhost:8080/hello');
+    const res = await myAxios.get('https://user-center-backend.onrender.com');
     console.log('后端响应：', res.data);
   } catch (error) {
     console.error('后端连接失败：', error);
